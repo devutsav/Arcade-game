@@ -1,0 +1,184 @@
+<!DOCTYPE html>  <!-- By Utsav Das -->
+<html lang="en-US">
+	
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+  <script>         // Js
+	var canvas;
+	var canvasContext; //graphical inf. of the canvas
+	var ballx=50;
+	var ballSpeedX=6; //BALL speed in x-direction
+	var bally=50;
+	var ballSpeedy=5;
+	var pad1Y=250; //pos of paddle 1
+	var pad2Y=250; //pos of paddle 2
+	const PADDLE_THICKNESS=10;
+	const PADDLE_HEIGHT=100;
+	var player1=0;
+	var player2=0;
+	const maxpoint=2;
+
+	var showWinScreen = false;
+	function calculateMousePos(evt)
+	{
+		var rect=canvas.getBoundingClientRect();
+		var root=document.documentElement;
+		var mouseX=evt.clientX-rect.left-root.scrollLeft;
+		var mouseY=evt.clientY-rect.top-root.scrollTop;
+		return{
+			x:mouseX,y:mouseY
+		};
+	}
+	function handleMouseClick(evt)
+	{
+		if(showWinScreen)
+		{
+				player1=0;
+				player2=0;
+				showWinScreen=false;
+		}
+	}
+	window.onload=function()
+	{
+		
+		canvas=document.getElementById("gameCanvas");
+		canvasContext=canvas.getContext("2d");
+		var framepersec=30;
+		
+		setInterval(function(){move();
+		draw(); },1000/framepersec);
+		/*draw();
+		draw();
+		draw();*/
+		canvas.addEventListener('mousedown',handleMouseClick);
+					
+		canvas.addEventListener('mousemove',function(evt){
+			var mousePos=calculateMousePos(evt);
+			pad1Y=mousePos.y-(PADDLE_HEIGHT/2);
+		});	
+		
+	}
+	function ballReset()
+	{
+		if(player1 >= maxpoint || player2 >= maxpoint)
+		{
+		       
+			//player2=0;
+			//player1=0;
+			showWinScreen=true;
+		}
+		ballx=(canvas.width/2);	
+		bally=canvas.height/2;
+	}
+	function computerPlays()
+	{
+		var paddleCenter=pad2Y+(PADDLE_HEIGHT/2);
+		if(paddleCenter<bally-35)
+		{
+			pad2Y=pad2Y+7;
+		}	
+		else if(paddleCenter>bally+35)
+		{
+			pad2Y=pad2Y-7;
+		}
+	}
+			
+        function move()
+	{
+		if(showWinScreen)
+		{
+			return;
+		}
+		computerPlays();
+		ballx = ballx + ballSpeedX;
+		//ballSpeedX++;
+		bally = bally + ballSpeedy;
+		if(bally>canvas.height)
+		{
+			ballSpeedy=-5;
+			
+		}
+		if(bally<0)
+		{
+			ballSpeedy=5 ;
+			
+		}
+		if(ballx>canvas.width)
+		{
+			if(bally>pad2Y && bally<pad2Y + PADDLE_HEIGHT)
+			{			
+				ballSpeedX=-ballSpeedX;
+				var delY=bally-(pad1Y+PADDLE_HEIGHT/2);  //speed of the ball canges on hitting the paddle at a smaller angle
+				ballSpeedY=delY+0.60;
+			}
+			else{
+				ballReset();
+				player1 +=1;
+			}
+		}
+		if(ballx<0)
+		{
+			//ballSpeedX=5 ;
+			if(bally > pad1Y && bally < pad1Y + PADDLE_HEIGHT)
+			{
+				ballSpeedX=-ballSpeedX;
+				var delY=bally-(pad1Y+PADDLE_HEIGHT/2);//speed of the ball canges on hitting the paddle at a smaller angle near the edges
+				ballSpeedY=delY+0.60;
+				
+			}
+			else{
+				ballReset();
+				player2 += 1;
+			}
+		}
+	}
+	function drawNet()
+	{
+		for(var i=0;i<canvas.height;i=i+35)
+		{
+			canvasContext.fillStyle='white';
+			canvasContext.fillRect(canvas.width/2-1,i,2,20);
+		}
+	}
+	function draw()
+	{
+		
+		canvasContext.fillStyle="#000000";
+		canvasContext.fillRect(0,0,canvas.width,canvas.height);// y,x,w,ht
+		if(showWinScreen)
+		{
+			if(player1 >= maxpoint) 
+			{
+				canvasContext.fillStyle='white';
+		       
+				canvasContext.fillText("Player 1 wins !",300,450);
+			}
+		
+		       else if(player2 >= maxpoint)
+		       {
+				canvasContext.fillStyle='white';
+				canvasContext.fillText("Player 2 wins !",300,450);
+			
+			}
+			canvasContext.fillStyle='white';
+			canvasContext.fillText("Click to continue",400,450);
+			return;
+		}
+		drawNet();		
+		//Left paddle
+		canvasContext.fillStyle='white';		
+		canvasContext.fillRect(0,pad1Y,PADDLE_THICKNESS,100);
+		//Right paddle
+		canvasContext.fillStyle='white';		
+		canvasContext.fillRect(canvas.width-10,pad2Y,PADDLE_THICKNESS,100);		
+		// ball
+		canvasContext.fillStyle='white';			
+		canvasContext.beginPath();
+		canvasContext.arc(ballx,bally,10,0,Math.PI*2,false);
+		canvasContext.fill();	
+		
+		canvasContext.fillText("PLayer 1:  "+player1,100,100);
+		canvasContext.fillText("PLayer 2:  "+player2,canvas.width-200,100);
+	}
+    </script>
+</html>
